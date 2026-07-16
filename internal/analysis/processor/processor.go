@@ -1451,8 +1451,8 @@ func (p *Processor) buildClipPath(settings *conf.Settings, scientificName string
 }
 
 // shouldDiscardDetection checks if a detection should be discarded based on various criteria.
-// The caller provides a settings snapshot and the precomputed minDetections (from
-// calculateMinDetectionsForModel) to avoid redundant settings fetches and ensure
+// The caller provides a settings snapshot and the per-item minDetections (from
+// effectiveMinDetections) to avoid redundant settings fetches and ensure
 // consistency within a single flush cycle.
 func (p *Processor) shouldDiscardDetection(item *PendingDetection, settings *conf.Settings, minDetections int) (shouldDiscard bool, reason string) {
 	// Check minimum detection count
@@ -1603,7 +1603,7 @@ func (p *Processor) processApprovedDetection(item *PendingDetection, speciesName
 	}
 }
 
-// calculateMinDetections computes the minimum number of required detections based on
+// calculateMinDetectionsForLevel computes the minimum number of required detections based on
 // the overlap setting and false positive filter level to filter false positives through
 // repeated detection confirmation.
 //

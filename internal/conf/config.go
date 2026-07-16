@@ -851,10 +851,10 @@ type SpeciesAction struct {
 
 // SpeciesConfig represents configuration for a specific species
 type SpeciesConfig struct {
-	Threshold   float64         `yaml:"threshold" json:"threshold"`                         // Confidence threshold
-	Interval    int             `yaml:"interval" json:"interval"`                           // Custom interval in seconds (0 = use default)
-	FilterLevel *int            `yaml:"filterlevel,omitempty" json:"filterLevel,omitempty"` // False-positive filter level override (0-5); nil = inherit global
-	Actions     []SpeciesAction `yaml:"actions" json:"actions"`                             // List of actions to execute
+	Threshold   float64         `yaml:"threshold" json:"threshold"`                                                          // Confidence threshold
+	Interval    int             `yaml:"interval" json:"interval"`                                                            // Custom interval in seconds (0 = use default)
+	FilterLevel *int            `yaml:"filterlevel,omitempty" json:"filterLevel,omitempty" jsonschema:"minimum=0,maximum=5"` // False-positive filter level override (0-5); omit to inherit the global level
+	Actions     []SpeciesAction `yaml:"actions" json:"actions"`                                                              // List of actions to execute
 }
 
 // SpeciesSettings contains all species-specific settings.

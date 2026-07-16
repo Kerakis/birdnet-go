@@ -714,3 +714,37 @@ func TestValidateSpeciesConfig_NaNThresholdRejected(t *testing.T) {
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "threshold")
 }
+
+func TestValidateSpeciesConfig_FilterLevelRange(t *testing.T) {
+	t.Parallel()
+	base := func(level *int) *RealtimeSettings {
+		return &RealtimeSettings{
+			Interval: 15,
+			Audio: AudioSettings{
+				Sources: []AudioSourceConfig{
+					{Name: "test", Device: testAudioDeviceSysdefault, Model: "birdnet"},
+				},
+				Export: ExportSettings{Type: AudioExportTypeWAV},
+			},
+			Species: SpeciesSettings{
+				Config: map[string]SpeciesConfig{
+					"turdus merula": {Threshold: 0.5, FilterLevel: level},
+				},
+			},
+		}
+	}
+
+	// Valid: nil (inherit), 0 (Off), and 5 (Maximum).
+	require.NoError(t, validateRealtimeSettings(base(nil)))
+	require.NoError(t, validateRealtimeSettings(base(new(0))))
+	require.NoError(t, validateRealtimeSettings(base(new(5))))
+
+	// Invalid: above 5 and below 0.
+	err := validateRealtimeSettings(base(new(6)))
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "filterLevel")
+
+	err = validateRealtimeSettings(base(new(-1)))
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "filterLevel")
+}

@@ -535,6 +535,17 @@ func validateSpeciesConfigSettings(settings *SpeciesSettings) error {
 				Context("threshold", config.Threshold).
 				Build()
 		}
+
+		// Check if the per-species filter level override is within valid range (0-5).
+		// A nil FilterLevel means "inherit the global level" and is always valid.
+		if config.FilterLevel != nil && (*config.FilterLevel < 0 || *config.FilterLevel > 5) {
+			return errors.Newf("species config for '%s': filterLevel must be between 0 and 5, got %d", speciesName, *config.FilterLevel).
+				Category(errors.CategoryValidation).
+				Context("validation_type", "species-config-filter-level").
+				Context("species_name", speciesName).
+				Context("filter_level", *config.FilterLevel).
+				Build()
+		}
 	}
 	return nil
 }
