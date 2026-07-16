@@ -4092,6 +4092,7 @@
           "threshold": "Seuil",
           "interval": "Intervalle",
           "intervalSeconds": "Intervalle (sec)",
+          "filterLevel": "Filter Level",
           "addButton": "Ajouter"
         },
         "noConfigurationsMessage": "Aucune configuration d'espèce personnalisée ajoutée",
@@ -4126,7 +4127,13 @@
           "searchPlaceholder": "Rechercher des espèces...",
           "noResults": "Aucune configuration correspondante",
           "editDisabledReason": "Enregistrez ou fermez l'éditeur actuel avant de modifier une autre espèce",
-          "actionsDisabledBusy": "Veuillez patienter jusqu'à la fin de l'opération en cours"
+          "actionsDisabledBusy": "Veuillez patienter jusqu'à la fin de l'opération en cours",
+          "filterLevelGlobal": "Global"
+        },
+        "filterLevel": {
+          "overrideLabel": "Override global filter level",
+          "overrideHelp": "This species uses its own filter level instead of the global setting.",
+          "inheritHelp": "This species inherits the global filter level. Enable to override it."
         }
       },
       "synonyms": {

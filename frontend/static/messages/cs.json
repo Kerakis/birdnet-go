@@ -4092,6 +4092,7 @@
           "threshold": "Práh",
           "interval": "Interval",
           "intervalSeconds": "Interval (s)",
+          "filterLevel": "Filter Level",
           "addButton": "Přidat"
         },
         "noConfigurationsMessage": "Nebyly přidány žádné vlastní konfigurace druhů",
@@ -4126,7 +4127,13 @@
           "searchPlaceholder": "Hledat druhy...",
           "noResults": "Žádné odpovídající konfigurace",
           "editDisabledReason": "Před úpravou jiného druhu uložte nebo zavřete aktuální editor",
-          "actionsDisabledBusy": "Počkejte prosím na dokončení aktuální operace"
+          "actionsDisabledBusy": "Počkejte prosím na dokončení aktuální operace",
+          "filterLevelGlobal": "Global"
+        },
+        "filterLevel": {
+          "overrideLabel": "Override global filter level",
+          "overrideHelp": "This species uses its own filter level instead of the global setting.",
+          "inheritHelp": "This species inherits the global filter level. Enable to override it."
         }
       },
       "synonyms": {

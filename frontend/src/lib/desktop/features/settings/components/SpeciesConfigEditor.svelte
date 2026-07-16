@@ -17,11 +17,14 @@
   import EditorSpeciesInput from './editor/EditorSpeciesInput.svelte';
   import { toLocalizedPredictions, matchTypedToCanonical } from '$lib/utils/speciesPredictions';
   import { resolveCommonToScientificUnique } from '$lib/stores/speciesDictionary.svelte';
+  import FalsePositiveFilterControl from '$lib/desktop/components/forms/FalsePositiveFilterControl.svelte';
+  import { BIRD_FP_LEVELS, getBirdFilterDescription } from '../utils/filterLevels';
 
   interface SavePayload {
     species: string;
     threshold: number;
     interval: number;
+    filterLevel?: number;
     actions: Action[];
   }
 
@@ -31,6 +34,8 @@
     predictions: string[];
     disabled?: boolean;
     saving?: boolean;
+    /** Current BirdNET overlap, used to show the effective confirmation count. */
+    overlap?: number;
     /** Resolve a canonical species value to its visitor-locale display label. */
     localizeLabel?: (_value: string) => string;
     onSave: (_payload: SavePayload) => void;
@@ -46,6 +51,7 @@
     predictions,
     disabled = false,
     saving = false,
+    overlap = 0,
     localizeLabel,
     onSave,
     onClose,
@@ -75,6 +81,12 @@
   let threshold = $state(config?.threshold ?? 0.5);
   // svelte-ignore state_referenced_locally
   let interval = $state(config?.interval ?? 0);
+  // Per-species filter level override. The checkbox seeds on when the config
+  // already has a level; otherwise the species inherits the global level.
+  // svelte-ignore state_referenced_locally
+  let overrideFilterLevel = $state(config?.filterLevel !== undefined);
+  // svelte-ignore state_referenced_locally
+  let filterLevel = $state(config?.filterLevel ?? 2);
   let showActions = $state(!!existingAction);
   let actionCommand = $state(existingAction?.command ?? '');
   let actionParameters = $state(
@@ -153,6 +165,7 @@
       species: resolveCanonicalForSave(),
       threshold,
       interval: Number(interval) || 0,
+      ...(overrideFilterLevel ? { filterLevel } : {}),
       actions,
     });
   }
@@ -223,7 +236,45 @@
     />
   </div>
 
-  <!-- Row 3: Actions (collapsible) -->
+  <!-- Row 3: per-species filter level override -->
+  <div class="border-t border-[var(--color-base-300)] pt-3">
+    <label class="flex items-center gap-2 cursor-pointer">
+      <span class="relative inline-flex items-center justify-center w-4 h-4">
+        <input
+          type="checkbox"
+          bind:checked={overrideFilterLevel}
+          disabled={disabled || saving}
+          class="peer appearance-none w-4 h-4 border-2 border-[var(--color-base-300)] rounded bg-[var(--color-base-100)] cursor-pointer transition-all checked:bg-[var(--color-primary)] checked:border-[var(--color-primary)]"
+        />
+        <Check
+          class="absolute w-2.5 h-2.5 text-[var(--color-primary-content)] pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity"
+        />
+      </span>
+      <span class="text-sm font-medium text-[var(--color-base-content)]">
+        {t('settings.species.customConfiguration.filterLevel.overrideLabel')}
+      </span>
+    </label>
+    <p class="text-xs text-[var(--color-base-content)]/60 mt-1">
+      {overrideFilterLevel
+        ? t('settings.species.customConfiguration.filterLevel.overrideHelp')
+        : t('settings.species.customConfiguration.filterLevel.inheritHelp')}
+    </p>
+
+    {#if overrideFilterLevel}
+      <div class="mt-3">
+        <FalsePositiveFilterControl
+          id="species-filter-level"
+          level={filterLevel}
+          levels={BIRD_FP_LEVELS}
+          onUpdate={v => (filterLevel = v)}
+          getDescription={level => getBirdFilterDescription(level, overlap)}
+          disabled={disabled || saving}
+        />
+      </div>
+    {/if}
+  </div>
+
+  <!-- Row 4: Actions (collapsible) -->
   <div class="border-t border-[var(--color-base-300)] pt-3">
     <button
       type="button"

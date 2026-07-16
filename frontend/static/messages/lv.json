@@ -4092,6 +4092,7 @@
           "threshold": "Slieksnis",
           "interval": "Intervāls",
           "intervalSeconds": "Intervāls (s)",
+          "filterLevel": "Filter Level",
           "addButton": "Pievienot"
         },
         "noConfigurationsMessage": "Nav pievienotu pielāgotu sugu konfigurāciju",
@@ -4126,7 +4127,13 @@
           "searchPlaceholder": "Meklēt sugas...",
           "noResults": "Nav atbilstošu konfigurāciju",
           "editDisabledReason": "Pirms citas sugas rediģēšanas saglabājiet vai aizveriet pašreizējo redaktoru",
-          "actionsDisabledBusy": "Lūdzu, uzgaidiet, līdz beidzas pašreizējā darbība"
+          "actionsDisabledBusy": "Lūdzu, uzgaidiet, līdz beidzas pašreizējā darbība",
+          "filterLevelGlobal": "Global"
+        },
+        "filterLevel": {
+          "overrideLabel": "Override global filter level",
+          "overrideHelp": "This species uses its own filter level instead of the global setting.",
+          "inheritHelp": "This species inherits the global filter level. Enable to override it."
         }
       },
       "synonyms": {

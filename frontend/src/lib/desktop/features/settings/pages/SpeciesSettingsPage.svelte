@@ -1112,6 +1112,7 @@
     species: string;
     threshold: number;
     interval: number;
+    filterLevel?: number;
     actions: {
       type: 'ExecuteCommand';
       command: string;
@@ -1119,7 +1120,7 @@
       executeDefaults: boolean;
     }[];
   }) {
-    const { species, threshold, interval, actions } = payload;
+    const { species, threshold, interval, filterLevel, actions } = payload;
     if (!species) return;
 
     let updatedConfig = { ...settings.config };
@@ -1155,7 +1156,12 @@
     }
 
     // eslint-disable-next-line security/detect-object-injection -- species is controlled component state
-    updatedConfig[species] = { threshold, interval, actions };
+    updatedConfig[species] = {
+      threshold,
+      interval,
+      actions,
+      ...(filterLevel !== undefined ? { filterLevel } : {}),
+    };
 
     try {
       settingsActions.updateSection('realtime', {
@@ -1500,6 +1506,7 @@
             localizeLabel={localizeSpeciesLabel}
             disabled={store.isLoading}
             saving={store.isSaving}
+            overlap={store.formData?.birdnet?.overlap ?? 0}
             onSave={handleEditorSave}
             onClose={closeEditor}
             onDelete={species => {

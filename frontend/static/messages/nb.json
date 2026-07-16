@@ -4092,6 +4092,7 @@
           "threshold": "Terskel",
           "interval": "Intervall",
           "intervalSeconds": "Intervall (s)",
+          "filterLevel": "Filter Level",
           "addButton": "Legg til"
         },
         "noConfigurationsMessage": "Ingen egendefinerte artskonfigurasjoner lagt til",
@@ -4126,7 +4127,13 @@
           "searchPlaceholder": "Søk arter...",
           "noResults": "Ingen matchende konfigurasjoner",
           "editDisabledReason": "Lagre eller lukk gjeldende redigeringsprogram før du redigerer en annen art",
-          "actionsDisabledBusy": "Vennligst vent til den gjeldende operasjonen er ferdig"
+          "actionsDisabledBusy": "Vennligst vent til den gjeldende operasjonen er ferdig",
+          "filterLevelGlobal": "Global"
+        },
+        "filterLevel": {
+          "overrideLabel": "Override global filter level",
+          "overrideHelp": "This species uses its own filter level instead of the global setting.",
+          "inheritHelp": "This species inherits the global filter level. Enable to override it."
         }
       },
       "synonyms": {

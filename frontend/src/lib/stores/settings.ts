@@ -481,6 +481,7 @@ export interface SpeciesSettings {
 export interface SpeciesConfig {
   threshold: number;
   interval: number;
+  filterLevel?: number; // 0-5 override; omit to inherit the global filter level
   actions: Action[];
 }
 

@@ -4092,6 +4092,7 @@
           "threshold": "Kynnysarvo",
           "interval": "Väli",
           "intervalSeconds": "Väli (sek)",
+          "filterLevel": "Filter Level",
           "addButton": "Lisää"
         },
         "noConfigurationsMessage": "Mukautettuja lajikokoonpanoja ei ole lisätty",
@@ -4126,7 +4127,13 @@
           "searchPlaceholder": "Etsi lajeja...",
           "noResults": "Ei vastaavia asetuksia",
           "editDisabledReason": "Tallenna tai sulje nykyinen muokkain ennen toisen lajin muokkaamista",
-          "actionsDisabledBusy": "Odota, että nykyinen toiminto on valmis"
+          "actionsDisabledBusy": "Odota, että nykyinen toiminto on valmis",
+          "filterLevelGlobal": "Global"
+        },
+        "filterLevel": {
+          "overrideLabel": "Override global filter level",
+          "overrideHelp": "This species uses its own filter level instead of the global setting.",
+          "inheritHelp": "This species inherits the global filter level. Enable to override it."
         }
       },
       "synonyms": {

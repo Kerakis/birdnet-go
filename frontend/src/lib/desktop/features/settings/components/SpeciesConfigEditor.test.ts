@@ -137,3 +137,40 @@ describe('SpeciesConfigEditor canonical-key persistence', () => {
     expect(savedSpecies(onSave)).toBe('Some Custom Name');
   });
 });
+
+describe('SpeciesConfigEditor filter level override', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('omits filterLevel when the override is off (default)', async () => {
+    // renderEditor seeds a config without filterLevel, so override starts off.
+    const { onSave } = renderEditor();
+
+    await fireEvent.click(screen.getByRole('button', { name: SAVE_BUTTON }));
+
+    expect(onSave).toHaveBeenCalledTimes(1);
+    expect(onSave.mock.calls[0][0]).not.toHaveProperty('filterLevel');
+  });
+
+  it('includes filterLevel when the seeded config has one (override on)', async () => {
+    const onSave = vi.fn();
+    render(SpeciesConfigEditor, {
+      props: {
+        species: 'barn owl',
+        config: { threshold: 0.5, interval: 0, filterLevel: 4, actions: [] },
+        predictions: ['Barn Owl'],
+        localizeLabel: fiLocalize,
+        overlap: 2.4,
+        onSave,
+        onClose: vi.fn(),
+        onInput: vi.fn(),
+        onPredictionSelect: vi.fn(),
+      },
+    });
+
+    await fireEvent.click(screen.getByRole('button', { name: SAVE_BUTTON }));
+
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ filterLevel: 4 }));
+  });
+});

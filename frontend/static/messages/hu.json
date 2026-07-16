@@ -4092,6 +4092,7 @@
           "threshold": "Küszöbérték",
           "interval": "Intervallum",
           "intervalSeconds": "Intervallum (mp)",
+          "filterLevel": "Filter Level",
           "addButton": "Hozzáadás"
         },
         "noConfigurationsMessage": "Nincs egyedi faj konfiguráció hozzáadva",
@@ -4126,7 +4127,13 @@
           "searchPlaceholder": "Fajok keresése...",
           "noResults": "Nincs megfelelő konfiguráció",
           "editDisabledReason": "Mentse el vagy zárja be a jelenlegi szerkesztőt egy másik faj szerkesztése előtt",
-          "actionsDisabledBusy": "Kérjük, várja meg a jelenlegi művelet befejezését"
+          "actionsDisabledBusy": "Kérjük, várja meg a jelenlegi művelet befejezését",
+          "filterLevelGlobal": "Global"
+        },
+        "filterLevel": {
+          "overrideLabel": "Override global filter level",
+          "overrideHelp": "This species uses its own filter level instead of the global setting.",
+          "inheritHelp": "This species inherits the global filter level. Enable to override it."
         }
       },
       "synonyms": {
