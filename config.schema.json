@@ -2333,6 +2333,12 @@
           "type": "integer",
           "description": "Custom interval in seconds (0 = use default)"
         },
+        "filterLevel": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 5,
+          "description": "False-positive filter level override (0-5); omit or null to inherit the global level"
+        },
         "actions": {
           "items": {
             "$ref": "#/$defs/SpeciesAction"
