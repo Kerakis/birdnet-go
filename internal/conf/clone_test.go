@@ -420,3 +420,21 @@ func assertSourceUnchanged(t *testing.T, src *Settings) {
 	assert.Equal(t, []any{"urgent", "bird-of-prey"}, pp.Filter.MetadataFilters["tags"],
 		"nested []any inside MetadataFilters must be independently cloned")
 }
+
+// TestCloneSpeciesConfigMap_FilterLevelIndependent verifies the per-species
+// FilterLevel pointer is deep-copied so mutating a clone can't leak into src,
+// and that a nil FilterLevel stays nil.
+func TestCloneSpeciesConfigMap_FilterLevelIndependent(t *testing.T) {
+	t.Parallel()
+	src := map[string]SpeciesConfig{
+		"american robin": {Threshold: 0.8, FilterLevel: new(5)},
+	}
+	dst := cloneSpeciesConfigMap(src)
+	require.NotNil(t, dst["american robin"].FilterLevel)
+	// Mutating the clone's pointed-to value must not affect the source.
+	*dst["american robin"].FilterLevel = 0
+	assert.Equal(t, 5, *src["american robin"].FilterLevel, "source FilterLevel changed via clone")
+	// nil stays nil.
+	src2 := map[string]SpeciesConfig{"x": {}}
+	assert.Nil(t, cloneSpeciesConfigMap(src2)["x"].FilterLevel)
+}

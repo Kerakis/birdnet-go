@@ -203,6 +203,10 @@ func cloneSpeciesConfigMap(m map[string]SpeciesConfig) map[string]SpeciesConfig 
 	out := make(map[string]SpeciesConfig, len(m))
 	for k, v := range m {
 		v.Actions = cloneSpeciesActions(v.Actions)
+		// Deep-copy the FilterLevel pointer so clones don't share the int.
+		if v.FilterLevel != nil {
+			v.FilterLevel = new(*v.FilterLevel)
+		}
 		out[k] = v
 	}
 	return out
