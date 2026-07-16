@@ -1636,9 +1636,11 @@ func (p *Processor) processApprovedDetection(item *PendingDetection, speciesName
 //   - Very high overlap (>2.9): may require many detections at higher levels
 //   - Floating-point precision: epsilon subtraction prevents values like 5.0000003 from ceiling to 6
 //
-// calculateMinDetectionsFromSettings computes minimum detections from settings alone.
-// This is a standalone function that doesn't require a Processor instance.
-func calculateMinDetectionsFromSettings(settings *conf.Settings) int {
+// calculateMinDetectionsForLevel computes the required confirmation count for a
+// given filter level and overlap. This is the pure core shared by the global
+// filter and per-species overrides; see the doc comment above for the full
+// explanation of the levels and the 6-second reference window.
+func calculateMinDetectionsForLevel(level int, overlap float64) int {
 	// BirdNET uses 3-second chunks for analysis
 	const chunkDurationSeconds = 3.0
 	// Bird vocalization reference window - typical duration of a bird call
@@ -1649,10 +1651,6 @@ func calculateMinDetectionsFromSettings(settings *conf.Settings) int {
 	// Small epsilon to prevent floating-point rounding errors in ceil()
 	// Without this, values like 5.0000000003 would ceil to 6 instead of 5
 	const epsilon = 1e-9
-
-	// Get filtering level from settings
-	level := settings.Realtime.FalsePositiveFilter.Level
-	overlap := settings.BirdNET.Overlap
 
 	// Level 0: no filtering
 	if level == 0 {
@@ -1695,9 +1693,16 @@ func calculateMinDetectionsFromSettings(settings *conf.Settings) int {
 	// (e.g., 5.0000000003 becomes 4.9999999993, which correctly ceils to 5)
 	// Always require at least 1 detection
 	required := maxDetectionsIn6s*threshold - epsilon
-	minDetections := int(math.Max(1, math.Ceil(required)))
+	return int(math.Max(1, math.Ceil(required)))
+}
 
-	return minDetections
+// calculateMinDetectionsFromSettings computes minimum detections from settings alone.
+// This is a standalone function that doesn't require a Processor instance.
+func calculateMinDetectionsFromSettings(settings *conf.Settings) int {
+	return calculateMinDetectionsForLevel(
+		settings.Realtime.FalsePositiveFilter.Level,
+		settings.BirdNET.Overlap,
+	)
 }
 
 // calculateMinDetections is a convenience method that calls calculateMinDetectionsFromSettings

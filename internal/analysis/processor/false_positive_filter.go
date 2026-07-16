@@ -121,6 +121,27 @@ func calculateMinDetectionsForModel(settings *conf.Settings, modelID string) int
 	return calculateMinDetectionsFromSettings(settings)
 }
 
+// effectiveMinDetections returns the required confirmation count for a specific
+// pending item, applying a per-species FilterLevel override when one is set.
+//
+// Bat models keep their own fixed-overlap calculation and ignore per-species
+// overrides (the override slider is bird-only). For bird models, a species with
+// a configured FilterLevel replaces the global level in the same overlap-aware
+// calculation; species without an override inherit the global level.
+func effectiveMinDetections(settings *conf.Settings, item *PendingDetection) int {
+	if item.BestModelID == classifier.RegistryIDBat {
+		return calculateBatMinDetections(settings)
+	}
+	if cfg, ok := lookupSpeciesConfig(
+		settings.Realtime.Species.Config,
+		item.Detection.Result.Species.CommonName,
+		item.Detection.Result.Species.ScientificName,
+	); ok && cfg.FilterLevel != nil {
+		return calculateMinDetectionsForLevel(*cfg.FilterLevel, settings.BirdNET.Overlap)
+	}
+	return calculateMinDetectionsFromSettings(settings)
+}
+
 // calculateBatMinDetections computes the minimum detection count for bat models.
 // The bat model's buffer overlap is fixed at 50% (hardcoded in BufferDimensions),
 // giving a 1.5-second step for a 3-second clip. Within a 6-second reference
