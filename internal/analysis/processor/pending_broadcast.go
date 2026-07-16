@@ -137,6 +137,7 @@ func CalculateVisibilityThreshold(minDetections int) int {
 // The caller must NOT hold pendingMutex.
 func (p *Processor) SnapshotVisiblePending() []SSEPendingDetection {
 	settings := p.currentSettings()
+	hasOverride := speciesConfigHasFilterOverride(settings.Realtime.Species.Config)
 
 	p.pendingMutex.RLock()
 	result := make([]SSEPendingDetection, 0, len(p.pendingDetections))
@@ -144,7 +145,7 @@ func (p *Processor) SnapshotVisiblePending() []SSEPendingDetection {
 		item := p.pendingDetections[key]
 		// Visibility threshold is derived per item from its effective (override-aware)
 		// min-detections so lenient overrides appear as early as they are accepted.
-		if item.Count < CalculateVisibilityThreshold(effectiveMinDetections(settings, &item)) {
+		if item.Count < CalculateVisibilityThreshold(effectiveMinDetections(settings, &item, hasOverride)) {
 			continue
 		}
 		result = append(result, p.buildPendingDTO(&item, PendingStatusActive))

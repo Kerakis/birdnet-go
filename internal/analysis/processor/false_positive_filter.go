@@ -111,6 +111,19 @@ func getRecommendedLevelForOverlap(overlap float64) (level int, overlapSufficien
 	return 0, true
 }
 
+// speciesConfigHasFilterOverride reports whether any species config carries a
+// per-species FilterLevel override. Callers compute this once per flush cycle so
+// effectiveMinDetections can skip the per-item species lookup entirely in the
+// common case where no overrides are configured.
+func speciesConfigHasFilterOverride(config map[string]conf.SpeciesConfig) bool {
+	for i := range config {
+		if config[i].FilterLevel != nil {
+			return true
+		}
+	}
+	return false
+}
+
 // effectiveMinDetections returns the required confirmation count for a specific
 // pending item, applying a per-species FilterLevel override when one is set.
 //
@@ -118,16 +131,22 @@ func getRecommendedLevelForOverlap(overlap float64) (level int, overlapSufficien
 // overrides (the override slider is bird-only). For bird models, a species with
 // a configured FilterLevel replaces the global level in the same overlap-aware
 // calculation; species without an override inherit the global level.
-func effectiveMinDetections(settings *conf.Settings, item *PendingDetection) int {
+//
+// hasOverride is the precomputed result of speciesConfigHasFilterOverride for the
+// same settings snapshot: when false, the per-item species lookup is skipped so
+// the no-override case stays O(1) (the flush loop holds pendingMutex).
+func effectiveMinDetections(settings *conf.Settings, item *PendingDetection, hasOverride bool) int {
 	if item.BestModelID == classifier.RegistryIDBat {
 		return calculateBatMinDetections(settings)
 	}
-	if cfg, ok := lookupSpeciesConfig(
-		settings.Realtime.Species.Config,
-		item.Detection.Result.Species.CommonName,
-		item.Detection.Result.Species.ScientificName,
-	); ok && cfg.FilterLevel != nil {
-		return calculateMinDetectionsForLevel(*cfg.FilterLevel, settings.BirdNET.Overlap)
+	if hasOverride {
+		if cfg, ok := lookupSpeciesConfig(
+			settings.Realtime.Species.Config,
+			item.Detection.Result.Species.CommonName,
+			item.Detection.Result.Species.ScientificName,
+		); ok && cfg.FilterLevel != nil {
+			return calculateMinDetectionsForLevel(*cfg.FilterLevel, settings.BirdNET.Overlap)
+		}
 	}
 	return calculateMinDetectionsFromSettings(settings)
 }

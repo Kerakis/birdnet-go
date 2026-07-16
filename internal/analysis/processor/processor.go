@@ -1720,6 +1720,7 @@ func (p *Processor) calculateMinDetections() int {
 func (p *Processor) flushPendingDetections() (pendingCount, flushedCount int) {
 	now := time.Now()
 	settings := p.currentSettings()
+	hasOverride := speciesConfigHasFilterOverride(settings.Realtime.Species.Config)
 
 	var terminalNotifs []SSEPendingDetection
 	var broadcastSnapshot []SSEPendingDetection
@@ -1735,7 +1736,7 @@ func (p *Processor) flushPendingDetections() (pendingCount, flushedCount int) {
 		}
 
 		speciesName := strings.ToLower(item.Detection.Result.Species.CommonName)
-		itemMinDetections := effectiveMinDetections(settings, &item)
+		itemMinDetections := effectiveMinDetections(settings, &item, hasOverride)
 
 		if shouldDiscard, reason := p.shouldDiscardDetection(&item, settings, itemMinDetections); shouldDiscard {
 			GetLogger().Info("discarding detection",
@@ -1779,7 +1780,7 @@ func (p *Processor) flushPendingDetections() (pendingCount, flushedCount int) {
 		broadcastSnapshot = make([]SSEPendingDetection, 0, len(p.pendingDetections)+len(terminalNotifs))
 		for key := range p.pendingDetections {
 			item := p.pendingDetections[key]
-			if item.Count >= CalculateVisibilityThreshold(effectiveMinDetections(settings, &item)) {
+			if item.Count >= CalculateVisibilityThreshold(effectiveMinDetections(settings, &item, hasOverride)) {
 				broadcastSnapshot = append(broadcastSnapshot, p.buildPendingDTO(&item, PendingStatusActive))
 			}
 		}
