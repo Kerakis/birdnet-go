@@ -1521,27 +1521,31 @@ func validateLiveStreamFields(updateMap map[string]any) error {
 }
 
 // validateSpeciesSection validates species settings
+// validateSpeciesConfigEntries validates a per-species config map: threshold in
+// [0,1], interval >= 0, and (when set) FilterLevel in [0,5].
+func validateSpeciesConfigEntries(config map[string]conf.SpeciesConfig) error {
+	for speciesName, cfg := range config {
+		if cfg.Interval < 0 {
+			return fmt.Errorf("species config for '%s': interval must be non-negative, got %d", speciesName, cfg.Interval)
+		}
+		if cfg.Threshold < 0 || cfg.Threshold > 1 {
+			return fmt.Errorf("species config for '%s': threshold must be between 0 and 1, got %f", speciesName, cfg.Threshold)
+		}
+		if cfg.FilterLevel != nil && (*cfg.FilterLevel < 0 || *cfg.FilterLevel > 5) {
+			return fmt.Errorf("species config for '%s': filterLevel must be between 0 and 5, got %d", speciesName, *cfg.FilterLevel)
+		}
+	}
+	return nil
+}
+
 func validateSpeciesSection(data json.RawMessage) error {
 	var speciesSettings conf.SpeciesSettings
 	if err := json.Unmarshal(data, &speciesSettings); err != nil {
 		return err
 	}
 
-	// Call the existing species config validation from the conf package
-	// This will validate threshold range (0-1) and interval (>= 0)
-	for speciesName, config := range speciesSettings.Config {
-		// Check if interval is non-negative
-		if config.Interval < 0 {
-			return fmt.Errorf("species config for '%s': interval must be non-negative, got %d", speciesName, config.Interval)
-		}
-
-		// Check if threshold is within valid range
-		if config.Threshold < 0 || config.Threshold > 1 {
-			return fmt.Errorf("species config for '%s': threshold must be between 0 and 1, got %f", speciesName, config.Threshold)
-		}
-	}
-
-	return nil
+	// Validate threshold range (0-1), interval (>= 0), and filterLevel (0-5).
+	return validateSpeciesConfigEntries(speciesSettings.Config)
 }
 
 // validateRealtimeSection validates realtime settings that contain species
@@ -1551,20 +1555,8 @@ func validateRealtimeSection(data json.RawMessage) error {
 		return err
 	}
 
-	// Validate species config if present
-	for speciesName, config := range realtimeSettings.Species.Config {
-		// Check if interval is non-negative
-		if config.Interval < 0 {
-			return fmt.Errorf("species config for '%s': interval must be non-negative, got %d", speciesName, config.Interval)
-		}
-
-		// Check if threshold is within valid range
-		if config.Threshold < 0 || config.Threshold > 1 {
-			return fmt.Errorf("species config for '%s': threshold must be between 0 and 1, got %f", speciesName, config.Threshold)
-		}
-	}
-
-	return nil
+	// Validate species config if present (threshold, interval, filterLevel).
+	return validateSpeciesConfigEntries(realtimeSettings.Species.Config)
 }
 
 // validateNotificationSection validates notification settings including template syntax

@@ -567,3 +567,21 @@ func createTestController(t *testing.T) *Controller {
 	c.Settings.Store(settings)
 	return c
 }
+
+// TestValidateSpeciesConfigEntries_FilterLevel verifies the per-species
+// FilterLevel range check (nil inherits; 0-5 valid; outside range rejected).
+func TestValidateSpeciesConfigEntries_FilterLevel(t *testing.T) {
+	t.Parallel()
+	ok := map[string]conf.SpeciesConfig{
+		"a": {Threshold: 0.5, FilterLevel: new(0)},
+		"b": {Threshold: 0.5, FilterLevel: new(5)},
+		"c": {Threshold: 0.5}, // nil = inherit, allowed
+	}
+	require.NoError(t, validateSpeciesConfigEntries(ok))
+
+	tooLow := map[string]conf.SpeciesConfig{"a": {Threshold: 0.5, FilterLevel: new(-1)}}
+	require.Error(t, validateSpeciesConfigEntries(tooLow))
+
+	tooHigh := map[string]conf.SpeciesConfig{"a": {Threshold: 0.5, FilterLevel: new(6)}}
+	require.Error(t, validateSpeciesConfigEntries(tooHigh))
+}
