@@ -16,6 +16,7 @@
   import { localizeSpeciesName } from '$lib/utils/speciesDisplay';
   import SortableDataTable from '$lib/desktop/components/data/SortableDataTable.svelte';
   import type { Column } from '$lib/desktop/components/data/DataTable.types';
+  import { BIRD_FP_LEVELS } from '../utils/filterLevels';
 
   interface Props {
     configs: Record<string, SpeciesConfig>;
@@ -49,6 +50,7 @@
     scientificName: string;
     threshold: number;
     interval: number;
+    filterLevel: number | undefined;
     hasActions: boolean;
   }
 
@@ -65,6 +67,7 @@
         scientificName,
         threshold: config.threshold ?? 0,
         interval: config.interval ?? 0,
+        filterLevel: config.filterLevel,
         hasActions: (config.actions?.length ?? 0) > 0,
       };
     })
@@ -103,6 +106,15 @@
       width: '6rem',
     },
     {
+      key: 'filterLevel',
+      header: t('settings.species.customConfiguration.labels.filterLevel'),
+      sortable: true,
+      // Sort unset (inherit global) below any explicit level.
+      sortValue: item => item.filterLevel ?? -1,
+      defaultDirection: 'desc',
+      width: '7rem',
+    },
+    {
       key: 'actions',
       header: t('settings.species.customConfiguration.columnHeaders.actions'),
       sortable: true,
@@ -120,6 +132,15 @@
 
   function searchAccessor(item: SpeciesConfigRow): string {
     return `${item.displayName} ${item.species} ${item.scientificName}`;
+  }
+
+  // Resolve a filter level to its display name, or "Global" when unset (inherit).
+  function filterLevelName(level: number | undefined): string {
+    if (level === undefined) {
+      return t('settings.species.customConfiguration.table.filterLevelGlobal');
+    }
+    const meta = BIRD_FP_LEVELS.find(l => l.value === level);
+    return meta ? t(meta.nameKey) : String(level);
   }
 
   function rowClass(item: SpeciesConfigRow): string {
@@ -228,6 +249,16 @@
           title={t('settings.species.customConfiguration.table.intervalDefaultTooltip')}
         >
           {t('settings.species.customConfiguration.table.intervalDefault')}
+        </span>
+      {/if}
+    {:else if column.key === 'filterLevel'}
+      {#if item.filterLevel === undefined}
+        <span class="text-xs text-muted">{filterLevelName(undefined)}</span>
+      {:else}
+        <span
+          class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-teal-500/10 text-teal-600 dark:text-teal-400"
+        >
+          {filterLevelName(item.filterLevel)}
         </span>
       {/if}
     {:else if column.key === 'actions'}

@@ -187,3 +187,23 @@ describe('SpeciesConfigTable', () => {
     expect(screen.queryByTestId('add-configuration-button')).toBeInTheDocument();
   });
 });
+
+describe('SpeciesConfigTable filter level column', () => {
+  it('shows the global-inherit label when a species has no filterLevel', () => {
+    renderTable({ configs: { 'American Robin': { threshold: 0.5, interval: 0, actions: [] } } });
+    expect(
+      screen.getByText('settings.species.customConfiguration.table.filterLevelGlobal')
+    ).toBeInTheDocument();
+  });
+
+  it('shows the level name when filterLevel is set', () => {
+    renderTable({
+      configs: {
+        'American Robin': { threshold: 0.5, interval: 0, filterLevel: 4, actions: [] },
+      },
+    });
+    expect(
+      screen.getByText('settings.main.sections.falsePositiveFilter.levelNames.strict')
+    ).toBeInTheDocument();
+  });
+});
