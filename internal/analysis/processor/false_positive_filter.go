@@ -111,16 +111,6 @@ func getRecommendedLevelForOverlap(overlap float64) (level int, overlapSufficien
 	return 0, true
 }
 
-// calculateMinDetectionsForModel routes to the correct minDetections calculation
-// based on the model ID. Bat models use a fixed 50% overlap instead of the
-// user-configurable BirdNET overlap, and read from a separate filter config.
-func calculateMinDetectionsForModel(settings *conf.Settings, modelID string) int {
-	if modelID == classifier.RegistryIDBat {
-		return calculateBatMinDetections(settings)
-	}
-	return calculateMinDetectionsFromSettings(settings)
-}
-
 // effectiveMinDetections returns the required confirmation count for a specific
 // pending item, applying a per-species FilterLevel override when one is set.
 //
@@ -162,31 +152,6 @@ func calculateBatMinDetections(settings *conf.Settings) int {
 	threshold := getThresholdForLevel(level)
 	required := maxDetections*threshold - epsilon
 	return int(math.Max(1, math.Ceil(required)))
-}
-
-// visibilityThresholds holds precomputed per-model visibility thresholds.
-// The map key is the model ID; unknown model IDs fall back to the bird threshold.
-type visibilityThresholds map[string]int
-
-// precomputeVisibilityThresholds calculates visibility thresholds for bird and
-// bat models once per settings snapshot so callers can look up by model ID
-// without recomputing inside a loop or under a lock.
-func precomputeVisibilityThresholds(settings *conf.Settings) visibilityThresholds {
-	birdVis := CalculateVisibilityThreshold(calculateMinDetectionsFromSettings(settings))
-	batVis := CalculateVisibilityThreshold(calculateBatMinDetections(settings))
-	return visibilityThresholds{
-		"":                       birdVis, // default for unknown model IDs
-		classifier.RegistryIDBat: batVis,
-	}
-}
-
-// getThreshold returns the visibility threshold for a model ID, falling back
-// to the bird threshold for unknown model IDs.
-func (vt visibilityThresholds) getThreshold(modelID string) int {
-	if t, ok := vt[modelID]; ok {
-		return t
-	}
-	return vt[""]
 }
 
 // getLevelDescription returns a detailed description of what each level does.

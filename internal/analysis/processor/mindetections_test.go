@@ -946,25 +946,6 @@ func TestCalculateBatMinDetections(t *testing.T) {
 	}
 }
 
-// TestCalculateMinDetectionsForModel verifies that the model-aware router
-// dispatches to the correct calculation based on model ID.
-func TestCalculateMinDetectionsForModel(t *testing.T) {
-	t.Parallel()
-
-	settings := &conf.Settings{}
-	settings.Realtime.FalsePositiveFilter.Level = 3
-	settings.BirdNET.Overlap = 2.4
-	settings.Bat.FalsePositiveFilter.Level = 3
-
-	birdResult := calculateMinDetectionsForModel(settings, "BirdNET_V2.4")
-	batResult := calculateMinDetectionsForModel(settings, "Bat")
-
-	// Bird: level 3, overlap 2.4, step 0.6s, max 10, 50% = 5
-	assert.Equal(t, 5, birdResult, "BirdNET model should use bird FP filter calculation")
-	// Bat: level 3, fixed 1.5s step, max 4, 50% = 2
-	assert.Equal(t, 2, batResult, "Bat model should use bat FP filter calculation")
-}
-
 // TestGetBaseConfidenceThreshold_BatModel verifies that bat detections
 // use settings.Bat.Threshold instead of settings.BirdNET.Threshold.
 func TestGetBaseConfidenceThreshold_BatModel(t *testing.T) {

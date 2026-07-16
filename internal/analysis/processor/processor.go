@@ -1712,13 +1712,14 @@ func (p *Processor) calculateMinDetections() int {
 }
 
 // flushPendingDetections processes one flush cycle, flushing eligible detections.
-// minDetections is computed per-item using the item's BestModelID so that bat
-// and bird models each apply their own false positive filter configuration.
+// minDetections is computed per-item via effectiveMinDetections, so bat and bird
+// models apply their own false positive filter configuration and a bird species
+// with a FilterLevel override uses its own required count. The visibility
+// threshold is derived per item from the same effective count.
 // Returns the count of pending and flushed detections for logging.
 func (p *Processor) flushPendingDetections() (pendingCount, flushedCount int) {
 	now := time.Now()
 	settings := p.currentSettings()
-	visThresholds := precomputeVisibilityThresholds(settings)
 
 	var terminalNotifs []SSEPendingDetection
 	var broadcastSnapshot []SSEPendingDetection
@@ -1734,7 +1735,7 @@ func (p *Processor) flushPendingDetections() (pendingCount, flushedCount int) {
 		}
 
 		speciesName := strings.ToLower(item.Detection.Result.Species.CommonName)
-		itemMinDetections := calculateMinDetectionsForModel(settings, item.BestModelID)
+		itemMinDetections := effectiveMinDetections(settings, &item)
 
 		if shouldDiscard, reason := p.shouldDiscardDetection(&item, settings, itemMinDetections); shouldDiscard {
 			GetLogger().Info("discarding detection",
@@ -1747,7 +1748,7 @@ func (p *Processor) flushPendingDetections() (pendingCount, flushedCount int) {
 				logger.String("operation", "discard_detection"))
 			delete(p.pendingDetections, mapKey)
 
-			if item.Count >= visThresholds.getThreshold(item.BestModelID) {
+			if item.Count >= CalculateVisibilityThreshold(itemMinDetections) {
 				terminalNotifs = append(terminalNotifs, p.buildFlushNotification(&item, PendingStatusRejected))
 			}
 
@@ -1768,7 +1769,7 @@ func (p *Processor) flushPendingDetections() (pendingCount, flushedCount int) {
 		delete(p.pendingDetections, mapKey)
 		flushedCount++
 
-		if item.Count >= visThresholds.getThreshold(item.BestModelID) {
+		if item.Count >= CalculateVisibilityThreshold(itemMinDetections) {
 			terminalNotifs = append(terminalNotifs, p.buildFlushNotification(&item, PendingStatusApproved))
 		}
 	}
@@ -1778,7 +1779,7 @@ func (p *Processor) flushPendingDetections() (pendingCount, flushedCount int) {
 		broadcastSnapshot = make([]SSEPendingDetection, 0, len(p.pendingDetections)+len(terminalNotifs))
 		for key := range p.pendingDetections {
 			item := p.pendingDetections[key]
-			if item.Count >= visThresholds.getThreshold(item.BestModelID) {
+			if item.Count >= CalculateVisibilityThreshold(effectiveMinDetections(settings, &item)) {
 				broadcastSnapshot = append(broadcastSnapshot, p.buildPendingDTO(&item, PendingStatusActive))
 			}
 		}

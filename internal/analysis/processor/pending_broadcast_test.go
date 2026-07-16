@@ -594,3 +594,30 @@ func TestBuildFlushNotification_IncludesLastUpdated(t *testing.T) {
 	assert.Equal(t, lastUpdated.Unix(), notif.LastUpdated,
 		"Flush notification LastUpdated should reflect latest hit time")
 }
+
+// TestSnapshotVisiblePending_LenientOverrideVisibleEarly verifies that a species
+// with a lenient per-species FilterLevel override becomes visible at a low hit
+// count that the (higher) global visibility threshold would otherwise hide.
+func TestSnapshotVisiblePending_LenientOverrideVisibleEarly(t *testing.T) {
+	t.Parallel()
+	// Global level 5 @ overlap 2.8 => minDet 21 => global visibility threshold 5.
+	s := settingsForBirdMinDetections(t, 21)
+	s.Realtime.Species.Config = map[string]conf.SpeciesConfig{
+		"rare owl": {FilterLevel: new(0)}, // override => minDet 1 => visibility 1
+	}
+	p := &Processor{
+		Settings: s,
+		pendingDetections: map[string]PendingDetection{
+			"src1:owl": {
+				Detection: Detections{Result: detection.Result{
+					Species: detection.Species{CommonName: "Rare Owl", ScientificName: "rare owl"},
+				}},
+				Source:      "src1",
+				BestModelID: "BirdNET_V2.4",
+				Count:       2, // below global visibility (5), at/above override visibility (1)
+			},
+		},
+	}
+	visible := p.SnapshotVisiblePending()
+	assert.Len(t, visible, 1, "lenient-override species should be visible at count 2")
+}
