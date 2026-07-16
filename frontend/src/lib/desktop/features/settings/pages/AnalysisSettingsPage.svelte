@@ -45,6 +45,14 @@
   import FalsePositiveFilterControl, {
     type FilterLevel,
   } from '$lib/desktop/components/forms/FalsePositiveFilterControl.svelte';
+  import {
+    BADGE_OFF,
+    BADGE_INFO,
+    BADGE_ERROR,
+    BIRD_FP_LEVELS,
+    birdFilterLevelMeta,
+    getBirdFilterDescription,
+  } from '$lib/desktop/features/settings/utils/filterLevels';
   import Checkbox from '$lib/desktop/components/forms/Checkbox.svelte';
   import SelectDropdown from '$lib/desktop/components/forms/SelectDropdown.svelte';
   import type { SelectOption } from '$lib/desktop/components/forms/SelectDropdown.types';
@@ -215,80 +223,13 @@
   // ── False Positive Filter helpers ─────────────────────────────────────
   const OVERLAP_COMPARISON_TOLERANCE = 0.001;
 
-  const falsePositiveFilterLevels = [
-    {
-      value: 0,
-      descriptionKey: 'settings.main.sections.falsePositiveFilter.levels.off',
-      minOverlap: 0.0,
-      threshold: 0.0,
-    },
-    {
-      value: 1,
-      descriptionKey: 'settings.main.sections.falsePositiveFilter.levels.lenient',
-      minOverlap: 2.0,
-      threshold: 0.2,
-    },
-    {
-      value: 2,
-      descriptionKey: 'settings.main.sections.falsePositiveFilter.levels.moderate',
-      minOverlap: 2.2,
-      threshold: 0.3,
-    },
-    {
-      value: 3,
-      descriptionKey: 'settings.main.sections.falsePositiveFilter.levels.balanced',
-      minOverlap: 2.4,
-      threshold: 0.5,
-    },
-    {
-      value: 4,
-      descriptionKey: 'settings.main.sections.falsePositiveFilter.levels.strict',
-      minOverlap: 2.7,
-      threshold: 0.6,
-    },
-    {
-      value: 5,
-      descriptionKey: 'settings.main.sections.falsePositiveFilter.levels.maximum',
-      minOverlap: 2.8,
-      threshold: 0.7,
-    },
-  ];
-
-  // Constants matching backend: internal/analysis/processor/processor.go
-  const CHUNK_DURATION_SECONDS = 3.0;
-  const REFERENCE_WINDOW_SECONDS = 6.0;
-  const MIN_SEGMENT_LENGTH = 0.1;
+  // Epsilon matching backend (internal/analysis/processor); used by the bat
+  // min-detections calc below. Bird levels, descriptions, and min-detections
+  // now live in the shared filterLevels module.
   const FLOAT_EPSILON = 1e-9;
 
-  function calculateMinDetections(level: number, overlap: number): number {
-    if (level === 0) return 1;
-
-    const levelData = safeArrayAccess(falsePositiveFilterLevels, level);
-    if (!levelData) return 1;
-
-    const segmentLength = Math.max(MIN_SEGMENT_LENGTH, CHUNK_DURATION_SECONDS - overlap);
-    const maxDetectionsIn6s = REFERENCE_WINDOW_SECONDS / segmentLength;
-    const required = maxDetectionsIn6s * levelData.threshold - FLOAT_EPSILON;
-    return Math.max(1, Math.ceil(required));
-  }
-
-  function getFalsePositiveFilterDescription(level: number, overlap: number): string {
-    const levelData = safeArrayAccess(falsePositiveFilterLevels, level);
-    if (!levelData) return '';
-
-    const minDet = calculateMinDetections(level, overlap);
-    const baseDescription = t(levelData.descriptionKey);
-
-    if (level === 0) return baseDescription;
-
-    return t('settings.main.sections.falsePositiveFilter.detectionCount', {
-      count: minDet.toString(),
-      description: baseDescription,
-    });
-  }
-
   function getMinimumOverlapForLevel(level: number): number {
-    return safeArrayAccess(falsePositiveFilterLevels, level)?.minOverlap ?? 0.0;
+    return safeArrayAccess(birdFilterLevelMeta, level)?.minOverlap ?? 0.0;
   }
 
   function updateFalsePositiveFilterLevel(newLevel: number) {
@@ -668,45 +609,7 @@
     });
   }
 
-  // ── FP filter level definitions for the shared component ─────────────
-  const BADGE_OFF = 'bg-black/5 dark:bg-white/5 text-[var(--color-base-content)]';
-  const BADGE_SUCCESS = 'bg-[var(--color-success)] text-[var(--color-success-content)]';
-  const BADGE_INFO = 'bg-[var(--color-info)] text-[var(--color-info-content)]';
-  const BADGE_WARNING = 'bg-[var(--color-warning)] text-[var(--color-warning-content)]';
-  const BADGE_ERROR = 'bg-[var(--color-error)] text-[var(--color-error-content)]';
-
-  const BIRD_FP_LEVELS: FilterLevel[] = [
-    {
-      value: 0,
-      nameKey: 'settings.main.sections.falsePositiveFilter.levelNames.off',
-      badgeClass: BADGE_OFF,
-    },
-    {
-      value: 1,
-      nameKey: 'settings.main.sections.falsePositiveFilter.levelNames.lenient',
-      badgeClass: BADGE_SUCCESS,
-    },
-    {
-      value: 2,
-      nameKey: 'settings.main.sections.falsePositiveFilter.levelNames.moderate',
-      badgeClass: BADGE_INFO,
-    },
-    {
-      value: 3,
-      nameKey: 'settings.main.sections.falsePositiveFilter.levelNames.balanced',
-      badgeClass: BADGE_WARNING,
-    },
-    {
-      value: 4,
-      nameKey: 'settings.main.sections.falsePositiveFilter.levelNames.strict',
-      badgeClass: BADGE_ERROR,
-    },
-    {
-      value: 5,
-      nameKey: 'settings.main.sections.falsePositiveFilter.levelNames.maximum',
-      badgeClass: BADGE_ERROR,
-    },
-  ];
+  // Bird FP levels + description live in the shared filterLevels module.
 
   // Bat has only 3 meaningful levels (fixed 50% overlap, 4 detections in window):
   // Off=bypass (1 det), Moderate=2 det, Strict=3 det.
@@ -736,7 +639,7 @@
 
   function calculateBatMinDetections(level: number): number {
     if (level === 0) return 1;
-    const levelData = safeArrayAccess(falsePositiveFilterLevels, level);
+    const levelData = safeArrayAccess(birdFilterLevelMeta, level);
     if (!levelData) return 1;
     const required = BAT_MAX_DETECTIONS_IN_WINDOW * levelData.threshold - FLOAT_EPSILON;
     return Math.max(1, Math.ceil(required));
@@ -1055,7 +958,7 @@
           level={falsePositiveFilter.level}
           levels={BIRD_FP_LEVELS}
           onUpdate={updateFalsePositiveFilterLevel}
-          getDescription={level => getFalsePositiveFilterDescription(level, birdnet?.overlap ?? 0)}
+          getDescription={level => getBirdFilterDescription(level, birdnet?.overlap ?? 0)}
           disabled={store.isLoading || store.isSaving}
         />
       </div>
