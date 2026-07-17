@@ -173,4 +173,44 @@ describe('SpeciesConfigEditor filter level override', () => {
 
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ filterLevel: 4 }));
   });
+
+  // The override editor mirrors the global filter control's level guidance: Off warns that nothing
+  // is filtered; Strict/Maximum note the higher overlap + hardware requirement. t() is mocked to
+  // return the key, so the notes are asserted by their i18n key.
+  const WARNING_OFF = 'settings.main.sections.falsePositiveFilter.warningOff';
+  const HARDWARE_NOTE = 'settings.main.sections.falsePositiveFilter.hardwareNote';
+
+  function renderWithLevel(level: number) {
+    render(SpeciesConfigEditor, {
+      props: {
+        species: 'barn owl',
+        config: { threshold: 0.5, interval: 0, filterLevel: level, actions: [] },
+        predictions: ['Barn Owl'],
+        localizeLabel: fiLocalize,
+        overlap: 2.4,
+        onSave: vi.fn(),
+        onClose: vi.fn(),
+        onInput: vi.fn(),
+        onPredictionSelect: vi.fn(),
+      },
+    });
+  }
+
+  it('shows the Off warning only when the override level is 0', () => {
+    renderWithLevel(0);
+    expect(screen.getByText(WARNING_OFF)).toBeInTheDocument();
+    expect(screen.queryByText(HARDWARE_NOTE)).not.toBeInTheDocument();
+  });
+
+  it('shows the hardware note at Strict/Maximum (levels 4-5), not the Off warning', () => {
+    renderWithLevel(5);
+    expect(screen.getByText(HARDWARE_NOTE)).toBeInTheDocument();
+    expect(screen.queryByText(WARNING_OFF)).not.toBeInTheDocument();
+  });
+
+  it('shows neither note at a mid level (e.g. Moderate)', () => {
+    renderWithLevel(2);
+    expect(screen.queryByText(WARNING_OFF)).not.toBeInTheDocument();
+    expect(screen.queryByText(HARDWARE_NOTE)).not.toBeInTheDocument();
+  });
 });

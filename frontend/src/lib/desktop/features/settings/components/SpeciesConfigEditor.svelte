@@ -7,7 +7,7 @@
   @component
 -->
 <script lang="ts">
-  import { ChevronRight, Check } from '@lucide/svelte';
+  import { ChevronRight, Check, AlertTriangle } from '@lucide/svelte';
   import { t } from '$lib/i18n';
   import type { SpeciesConfig, Action } from '$lib/stores/settings';
   import EditorCard from './editor/EditorCard.svelte';
@@ -271,6 +271,19 @@
           disabled={disabled || saving}
         />
       </div>
+
+      <!-- Level guidance, mirroring the global filter control (AnalysisSettingsPage): Off warns that
+           nothing is filtered; Strict/Maximum note the higher overlap + hardware requirement. -->
+      {#if filterLevel === 0}
+        <div class="flex items-start gap-2 mt-2 text-xs text-[var(--color-warning)]">
+          <AlertTriangle class="size-3.5 shrink-0 mt-0.5" />
+          <span>{t('settings.main.sections.falsePositiveFilter.warningOff')}</span>
+        </div>
+      {:else if filterLevel >= 4}
+        <p class="text-xs text-[var(--color-base-content)]/60 mt-2">
+          {t('settings.main.sections.falsePositiveFilter.hardwareNote')}
+        </p>
+      {/if}
     {/if}
   </div>
 
