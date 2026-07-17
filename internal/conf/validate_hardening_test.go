@@ -715,6 +715,8 @@ func TestValidateSpeciesConfig_NaNThresholdRejected(t *testing.T) {
 	assert.Contains(t, err.Error(), "threshold")
 }
 
+// TestValidateSpeciesConfig_FilterLevelRange verifies load-time validation of
+// the per-species FilterLevel: nil/0/5 are accepted, out-of-range is rejected.
 func TestValidateSpeciesConfig_FilterLevelRange(t *testing.T) {
 	t.Parallel()
 	base := func(level *int) *RealtimeSettings {

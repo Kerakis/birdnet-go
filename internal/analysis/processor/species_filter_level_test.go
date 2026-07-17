@@ -9,6 +9,8 @@ import (
 	"github.com/tphakala/birdnet-go/internal/detection"
 )
 
+// TestSpeciesConfigHasFilterOverride verifies detection of a per-species
+// FilterLevel override, including that level 0 counts as a real override.
 func TestSpeciesConfigHasFilterOverride(t *testing.T) {
 	t.Parallel()
 	assert.False(t, speciesConfigHasFilterOverride(nil), "nil map has no override")
@@ -20,6 +22,8 @@ func TestSpeciesConfigHasFilterOverride(t *testing.T) {
 	}), "a FilterLevel (even 0) counts as an override")
 }
 
+// TestCalculateMinDetectionsForLevel checks the pure level+overlap
+// min-detections calculation against known values.
 func TestCalculateMinDetectionsForLevel(t *testing.T) {
 	t.Parallel()
 	// overlap 2.4: segment 0.6, maxDet 10. level3=0.5->5, level5=0.7->7, level0->1.
@@ -28,6 +32,8 @@ func TestCalculateMinDetectionsForLevel(t *testing.T) {
 	assert.Equal(t, 7, calculateMinDetectionsForLevel(5, 2.4))
 }
 
+// birdItem builds a bird-model PendingDetection for the given common and
+// scientific names, used to exercise per-species lookup in the tests.
 func birdItem(common, scientific string) *PendingDetection {
 	return &PendingDetection{
 		Detection: Detections{
@@ -39,6 +45,9 @@ func birdItem(common, scientific string) *PendingDetection {
 	}
 }
 
+// TestEffectiveMinDetections verifies the per-item required-count resolution:
+// inherit, stricter and more-permissive overrides, the no-override fast path,
+// and that bat items ignore per-species overrides.
 func TestEffectiveMinDetections(t *testing.T) {
 	t.Parallel()
 
