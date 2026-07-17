@@ -4092,7 +4092,7 @@
           "threshold": "Prah",
           "interval": "Interval",
           "intervalSeconds": "Interval (s)",
-          "filterLevel": "Filter Level",
+          "filterLevel": "Úroveň filtra",
           "addButton": "Pridať"
         },
         "noConfigurationsMessage": "Neboli pridané žiadne vlastné konfigurácie druhov",
@@ -4128,12 +4128,12 @@
           "noResults": "Žiadne zodpovedajúce konfigurácie",
           "editDisabledReason": "Pred úpravou iného druhu uložte alebo zatvorte aktuálny editor",
           "actionsDisabledBusy": "Počkajte prosím na dokončenie aktuálnej operácie",
-          "filterLevelGlobal": "Global"
+          "filterLevelGlobal": "Globálna"
         },
         "filterLevel": {
-          "overrideLabel": "Override global filter level",
-          "overrideHelp": "This species uses its own filter level instead of the global setting.",
-          "inheritHelp": "This species inherits the global filter level. Enable to override it."
+          "overrideLabel": "Prepísať globálnu úroveň filtra",
+          "overrideHelp": "Tento druh používa vlastnú úroveň filtra namiesto globálneho nastavenia.",
+          "inheritHelp": "Tento druh dedí globálnu úroveň filtra. Povoľte pre jej prepísanie."
         }
       },
       "synonyms": {

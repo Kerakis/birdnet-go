@@ -4092,7 +4092,7 @@
           "threshold": "Limiar",
           "interval": "Intervalo",
           "intervalSeconds": "Intervalo (seg)",
-          "filterLevel": "Filter Level",
+          "filterLevel": "Nível de filtro",
           "addButton": "Adicionar"
         },
         "noConfigurationsMessage": "Nenhuma configuração personalizada de espécie adicionada",
@@ -4131,9 +4131,9 @@
           "filterLevelGlobal": "Global"
         },
         "filterLevel": {
-          "overrideLabel": "Override global filter level",
-          "overrideHelp": "This species uses its own filter level instead of the global setting.",
-          "inheritHelp": "This species inherits the global filter level. Enable to override it."
+          "overrideLabel": "Substituir o nível de filtro global",
+          "overrideHelp": "Esta espécie usa o seu próprio nível de filtro em vez da configuração global.",
+          "inheritHelp": "Esta espécie herda o nível de filtro global. Ative para substituí-lo."
         }
       },
       "synonyms": {

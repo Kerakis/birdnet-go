@@ -4092,7 +4092,7 @@
           "threshold": "Tröskelvärde",
           "interval": "Intervall",
           "intervalSeconds": "Intervall (s)",
-          "filterLevel": "Filter Level",
+          "filterLevel": "Filternivå",
           "addButton": "Lägg till"
         },
         "noConfigurationsMessage": "Inga anpassade artkonfigurationer tillagda",
@@ -4131,9 +4131,9 @@
           "filterLevelGlobal": "Global"
         },
         "filterLevel": {
-          "overrideLabel": "Override global filter level",
-          "overrideHelp": "This species uses its own filter level instead of the global setting.",
-          "inheritHelp": "This species inherits the global filter level. Enable to override it."
+          "overrideLabel": "Åsidosätt global filternivå",
+          "overrideHelp": "Denna art använder sin egen filternivå istället för den globala inställningen.",
+          "inheritHelp": "Denna art ärver den globala filternivån. Aktivera för att åsidosätta den."
         }
       },
       "synonyms": {
